@@ -79,7 +79,52 @@ class MyHomePage extends StatelessWidget {
           ),
           ElevatedButton(
               onPressed: () async {
-                login(context);
+                try {
+                  UserCredential userCredential =
+                      await FirebaseAuth.instance.signInWithEmailAndPassword(
+                    email: mailAddress!,
+                    password: password!,
+                  );
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => Todo(
+                                user: userCredential.user!,
+                              )));
+                } on FirebaseAuthException catch (e) {
+                  if (e.code == 'user-not-found') {
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                              title: Text("エラー"),
+                              content: Text("メールアドレスが見つかりません。"),
+                              actions: [
+                                TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Text("OK"))
+                              ]);
+                        });
+                  } else if (e.code == 'wrong-password') {
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Text("エラー"),
+                            content: Text("パスワードが違います。"),
+                            actions: [
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text("OK"))
+                            ],
+                          );
+                        });
+                  }
+                }
               },
               child: Container(
                   width: 200,
@@ -125,12 +170,6 @@ class MyHomePage extends StatelessWidget {
 
     if (result == FirebaseAuthResultStatus.Successful) {
       // ログイン成功時の処理
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => Todo(
-                    user: FirebaseAuth.instance.currentUser!,
-                  )));
     } else {
       // ログイン失敗時の処理
       final errorMessage =
