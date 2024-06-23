@@ -7,6 +7,7 @@ import 'registration.dart';
 import 'todo.dart';
 
 void main() async {
+  //以下Firebaseを使用する際の宣言
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
